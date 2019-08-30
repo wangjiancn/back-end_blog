@@ -11,13 +11,17 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../../blog
 
 # Envirnment
+ENV_SENTRY_DSN = os.environ.get('ENV_SENTRY_DSN', '')
 ENV_MYSQL_USERNAME = os.environ.get('ENV_MYSQL_USERNAME', 'root')
-ENV_MYSQL_PASSWORD = os.environ.get('ENV_MYSQL_PASSWORD', '123456')
+ENV_MYSQL_PASSWORD = os.environ.get('ENV_MYSQL_PASSWORD', 'toor')
 ENV_MYSQL_HOST = os.environ.get('ENV_MYSQL_HOST', '127.0.0.1')
 ENV_MYSQL_POST = os.environ.get('ENV_MYSQL_POST', '3306')
 ENV_MYSQL_DATABASE_NAME = os.environ.get('ENV_MYSQL_DATABASE_NAME', 'djangoBlog')
@@ -36,6 +40,11 @@ SECRET_KEY = ENV_BLOG_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('ENV_DEBUG', 'true') == 'true'
+
+sentry_sdk.init(
+    dsn=ENV_SENTRY_DSN,
+    integrations=[DjangoIntegration()]
+)
 
 ALLOWED_HOSTS = ['*']
 
@@ -66,7 +75,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'utils.middleware.APIExceptionHandleMiddleware'
+    'utils.middleware.APIMiddleware'
 ]
 
 ROOT_URLCONF = 'blog.urls'
