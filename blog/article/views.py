@@ -1,5 +1,6 @@
 import json
 import uuid
+import os
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -12,8 +13,6 @@ from .models import Post, Tag, Category
 from .action import actions
 from utils.api_response import APIResponse, APIResponseError
 from utils.tool import is_uuid, parse_query_string
-
-# Create your views here.
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -74,8 +73,7 @@ class PostView(View):
 
 
 def index(r):
-    return render(r, 'index.html')
-    return APIResponse(dict(name='hello world'))
+    return APIResponse(dict(name='hello world', hostname=os.environ.get('HOSTNAME', 'none')))
 
 
 @require_POST
