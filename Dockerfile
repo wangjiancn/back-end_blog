@@ -17,6 +17,11 @@ COPY Pipfile.lock .
 RUN pipenv install --system && apk del .build-deps
 COPY blog .
 
+ARG version='none'
+ARG date="none"
+
+ENV VERSION=${version}
+ENV RELASE_DATETIME=${date}
 
 
 EXPOSE 8000
