@@ -24,3 +24,19 @@ def token_required(view_func):
             request.user = UserProfile.objects.get(username=request_jwt.get('data', {}).get('username'))
             return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+
+def token_optional(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        authorization = request.headers.get('authorization')
+        if authorization:
+            try:
+                authorization = re.sub('Bearer\s', '', authorization)
+                request_jwt = jwt.decode(authorization, settings.SECRET_KEY, True)
+            except Exception:
+                pass
+            else:
+                request.user = UserProfile.objects.get(username=request_jwt.get('data', {}).get('username'))
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view

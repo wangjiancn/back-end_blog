@@ -5,9 +5,10 @@ import os
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views import View
+from django.db.models import Q
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
-from acl.auth_wrap import token_required
+from acl.auth_wrap import token_required, token_optional
 
 from .models import Post, Tag, Category
 from .action import actions
@@ -42,7 +43,7 @@ class TagView(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PostView(View):
-
+    @method_decorator(token_optional, name='dispatch')
     def get(self, r, *args, **kwargs):
         pagination, order_by, filters, defer, search = parse_query_string(r.GET, 'post')
         if kwargs.get('post_id'):
@@ -50,7 +51,11 @@ class PostView(View):
             post.add_view_count()
             return APIResponse(post.to_dict())
         else:
-            posts = Post.objects.active(search, **filters).defer(*defer).order_by(*order_by).pagination(**pagination)
+            if r.user and r.user.username:
+                query = search & (Q(**filters) | Q(author=r.user))
+            else:
+                query = search & Q(**filters)
+            posts = Post.objects.active(query).defer(*defer).order_by(*order_by).pagination(**pagination)
             return APIResponse(posts)
 
     @method_decorator(token_required, name='dispatch')
