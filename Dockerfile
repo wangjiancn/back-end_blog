@@ -6,7 +6,7 @@ LABEL size="153mb"
 # 在项目目录创建 .venv存放虚拟环境
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache mariadb-connector-c-dev &&\
+    apk add --no-cache mariadb-connector-c-dev binutils libc-dev &&\
     apk add --no-cache --virtual .build-deps build-base  mariadb-dev && \
     pip install --trusted-host=pypi.douban.com -i http://pypi.douban.com/simple/ --no-cache-dir pipenv 
 
