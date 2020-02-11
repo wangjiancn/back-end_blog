@@ -1,19 +1,20 @@
 import json
-import uuid
 import os
 
+from django.db.models import Q
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views import View
-from django.db.models import Q
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from acl.auth_wrap import token_required, token_optional
 
-from .models import Post, Tag, Category
+from acl.auth_wrap import token_optional
+from acl.auth_wrap import token_required
+from utils.api_response import APIResponse
+from utils.tool import parse_query_string
 from .action import actions
-from utils.api_response import APIResponse, APIResponseError
-from utils.tool import is_uuid, parse_query_string
+from .models import Category
+from .models import Post
+from .models import Tag
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -52,10 +53,13 @@ class PostView(View):
             return APIResponse(post.to_dict())
         else:
             if r.user and r.user.username:
-                query = search & (Q(**filters) | Q(author=r.user))
+                share_filters = {k: v for k, v in filters.items()
+                                 if k not in ['private', 'is_publish']}
+                query = search & (Q(**filters) | Q(author=r.user, **share_filters))
             else:
                 query = search & Q(**filters)
-            posts = Post.objects.active(query).defer(*defer).order_by(*order_by).pagination(**pagination)
+            posts = Post.objects.active(query).defer(*defer).order_by(*order_by).pagination(
+                **pagination)
             return APIResponse(posts)
 
     @method_decorator(token_required, name='dispatch')
