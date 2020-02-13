@@ -39,7 +39,7 @@ ENV_BLOG_SECRET_KEY = os.environ.get('ENV_BLOG_SECRET_KEY', 'secret_key')
 SECRET_KEY = ENV_BLOG_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('ENV_DEBUG', 'true') == 'true'
+DEBUG = os.environ.get('ENV_DEBUG', 'false') == 'true'
 
 sentry_sdk.init(
     dsn=ENV_SENTRY_DSN,
