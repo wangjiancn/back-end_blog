@@ -54,7 +54,7 @@ class PostView(View):
         else:
             if r.user and r.user.username:
                 share_filters = {k: v for k, v in filters.items()
-                                 if k not in ['private', 'is_publish']}
+                                 if k not in ['private', 'is_publish','rate__gt']}
                 query = search & (Q(**filters) | Q(author=r.user, **share_filters))
             else:
                 query = search & Q(**filters)
