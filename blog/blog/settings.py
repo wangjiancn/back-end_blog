@@ -14,23 +14,31 @@ import os
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../../blog
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))  # ../../blog
 
-# Envirnment
+# Environment
 ENV_SENTRY_DSN = os.environ.get('ENV_SENTRY_DSN', '')
 ENV_MYSQL_USERNAME = os.environ.get('ENV_MYSQL_USERNAME', 'root')
 ENV_MYSQL_PASSWORD = os.environ.get('ENV_MYSQL_PASSWORD', 'toor')
 ENV_MYSQL_HOST = os.environ.get('ENV_MYSQL_HOST', '127.0.0.1')
 ENV_MYSQL_POST = os.environ.get('ENV_MYSQL_POST', '3306')
-ENV_MYSQL_DATABASE_NAME = os.environ.get('ENV_MYSQL_DATABASE_NAME', 'djangoBlog')
+ENV_MYSQL_DATABASE_NAME = os.environ.get(
+    'ENV_MYSQL_DATABASE_NAME', 'djangoBlog')
+# ../../media
 ENV_UPLOAD_PATH = os.environ.get(
-    'ENV_UPLOAD_PATH',
-    os.path.join(os.path.dirname(BASE_DIR), 'media')  # ../../media
-)
+    'ENV_UPLOAD_PATH', os.path.join(os.path.dirname(BASE_DIR), 'media'))
+ENV_QINIU_AK = os.environ.get('ENV_QINIU_AK', 'your qiniu AccessKey')
+ENV_QINIU_SK = os.environ.get('ENV_QINIU_SK', 'your qiniu SecretKey')
+ENV_QINIU_DEFAULT_BUCKET = os.environ.get(
+    'ENV_QINIU_DEFAULT_BUCKET', 'smartpython')
 
 ENV_BLOG_SECRET_KEY = os.environ.get('ENV_BLOG_SECRET_KEY', 'secret_key')
+
+QINIU_BUCKET_URL_MAP = {
+    'smartpython': 'http://image.cdn.smartpython.com'
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -47,7 +55,6 @@ sentry_sdk.init(
 )
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -102,7 +109,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blog.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -119,7 +125,6 @@ DATABASES = {
     },
 
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -139,7 +144,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -152,7 +156,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
