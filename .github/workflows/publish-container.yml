@@ -1,0 +1,49 @@
+name: Publish container image
+
+'on':
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: wangjiancn/personal-blog-backend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push immutable image
+        id: push
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          push: true
+          build-args: |
+            version=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/wangjiancn/back-end_blog
+            org.opencontainers.image.revision=${{ github.sha }}
+            com.my-ops.source-revision=${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Record immutable reference
+        run: |
+          printf "### Published image\n\n\`%s/%s@%s\`\n" \
+            "$REGISTRY" "$IMAGE_NAME" "${{ steps.push.outputs.digest }}" \
+            >> "$GITHUB_STEP_SUMMARY"

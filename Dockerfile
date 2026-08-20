@@ -1,31 +1,24 @@
-FROM python:3.7.4-alpine
+FROM python:3.7.4-alpine@sha256:6673d8ce9610d166b6d7d6abda21537ddcf30e6bc8c20ca86f17f1085e20ac95
 
-LABEL description="python with mysqlclient,pipenv,uwsgi, nginx, and r"
-LABEL size="153mb"
+LABEL org.opencontainers.image.source="https://github.com/wangjiancn/back-end_blog"
 
-# 在项目目录创建 .venv存放虚拟环境
-
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache mariadb-connector-c-dev binutils libc-dev &&\
-    apk add --no-cache --virtual .build-deps build-base  mariadb-dev && \
-    pip install --trusted-host=pypi.douban.com -i http://pypi.douban.com/simple/ --no-cache-dir pipenv 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add --no-cache mariadb-connector-c-dev \
+    && apk add --no-cache --virtual .build-deps build-base mariadb-dev \
+    && pip install --no-cache-dir --index-url https://pypi.tuna.tsinghua.edu.cn/simple pipenv==2022.12.19
 
 WORKDIR /app
 
-COPY Pipfile .
-COPY Pipfile.lock .
-RUN pipenv install --system && apk del .build-deps
-COPY blog .
+COPY Pipfile Pipfile.lock ./
+RUN PIPENV_PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple pipenv sync --system \
+    && apk del .build-deps
 
-ARG version='none'
-ARG date="none"
+COPY blog ./
+RUN sed -i 's/^from settings import /from blog.settings import /' utils/qiniu_tool.py
 
-ENV VERSION=${version}
-ENV RELASE_DATETIME=${date}
-
+ARG version=unknown
+LABEL com.my-ops.source-revision=$version
 
 EXPOSE 8000
-EXPOSE 80
 
-ENTRYPOINT gunicorn blog.wsgi -b 0.0.0.0:8000
-
+ENTRYPOINT ["gunicorn", "blog.wsgi", "-b", "0.0.0.0:8000"]
